@@ -8,6 +8,7 @@ This repository contains a Flask-based API for image detection and text recognit
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
 - [File Structure](#file-structure)
+- [Migration to openai>=1.0.0](#migration-to-openai100)
 
 ## Installation
 
@@ -147,6 +148,28 @@ detection_smarter/
 ├── requirements.txt          # Python dependencies
 └── README.md                 # Project documentation
 ```
+
+## Migration to openai>=1.0.0
+
+This project has been updated to use the new `openai` API interface. The `openai.Completion` method has been replaced with `openai.ChatCompletion.create`.
+
+### Example Usage
+
+```python
+import openai
+
+def get_completion(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return response.choices[0].message['content']
+```
+
+Make sure to update your `requirements.txt` to include `openai>=1.0.0`.
 
 ## Contributing
 

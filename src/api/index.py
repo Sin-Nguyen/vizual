@@ -3,13 +3,23 @@ from werkzeug.utils import secure_filename
 from core.index import detect_image, detect_with_py
 from core.scenes import list_scene_image, write_base64_to_image
 from core.tesseract import detect_text, get_words_dom
+from core.analyze_with_gpt import main as analyze_with_gpt
 import os
 import base64
+import logging
 
 app = Flask(__name__)
 port = 4721
 debug_port = 4900
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20MB limit
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+@app.before_request
+def log_request_info():
+    app.logger.info('Endpoint: %s', request.endpoint)
+    # app.logger.info('Body: %s', request.get_data())
 
 @app.route('/', methods=['GET'])
 def home():
@@ -133,7 +143,25 @@ def py_detect_image():
         )
     except Exception as e:
         return jsonify(message=f'Error: {str(e)}'), 500
+    
+@app.route('/analyze/text', methods=['POST'])
+def analyze_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image file provided"}), 400
+
+    detect_option = request.args.get('detect_option')
+    scene_text = request.args.get('scene_text')
+    
+    image = request.files['image']
+    image_path = os.path.join('/tmp', image.filename)
+    image.save(image_path)
+    
+    try:
+        result = analyze_with_gpt(detect_option, image_path, scene_text)
+        return jsonify({"result": result}), 200
+    finally:
+        os.remove(image_path)
 
 if __name__ == '__main__':
-    app.run(port=port)
+    app.run(port=port, debug=True)
     # app.run(port=debug_port)

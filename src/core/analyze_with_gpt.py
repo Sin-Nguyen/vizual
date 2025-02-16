@@ -1,12 +1,9 @@
 import cv2
 from pytesseract import pytesseract
-import openai
-
-# Configure OpenAI API
-openai.api_key = "your_openai_api_key"
-
-# Set Tesseract executable path if needed
-# pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+from openai import OpenAI
+from openai_chat_request import get_chat_completion
+import sys
+import os
 
 # Preprocessing Function
 def preprocess_image(image_path):
@@ -23,20 +20,9 @@ def perform_ocr(image):
 
 # ChatGPT Analysis Function
 def analyze_with_chatgpt(ocr_data, extracted_text, context_description=""):
-    query = f"""
-    OCR detected text data: {ocr_data}.
-    Extracted text: {extracted_text}.
-    Context: {context_description}.
-    Suggest improvements or preprocessing techniques for better accuracy.
-    """
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are an AI assistant for image analysis."},
-            {"role": "user", "content": query},
-        ]
-    )
-    return response["choices"][0]["message"]["content"]
+   query_list = f"OCR detected text data: {ocr_data}. Extracted text: {extracted_text}. Context: {context_description}. Suggest improvements or preprocessing techniques for better accuracy."
+   response = get_chat_completion(query_list)
+   return response
 
 # Coordinate Extraction from OCR Data
 def extract_coordinates(ocr_data, target_text):
@@ -49,10 +35,8 @@ def extract_coordinates(ocr_data, target_text):
     return None
 
 # Main Workflow
-def main():
-    # Step 1: Input Screenshot
-    screenshot_path = "screen.png"
-
+def main(detection_type, screenshot_path, scene_text):
+    # Step 1: Load the Screenshot
     # Step 2: Preprocess the Image
     processed_image = preprocess_image(screenshot_path)
     cv2.imwrite("processed_screen.png", processed_image)  # Save for verification
@@ -61,19 +45,36 @@ def main():
     ocr_data, extracted_text = perform_ocr(processed_image)
 
     # Step 4: Analyze with ChatGPT
-    context_description = "Looking for the login button or 'Submit' text in the image."
+    context_description = "Looking for the {scene_text} text in the image."
     chatgpt_response = analyze_with_chatgpt(ocr_data, extracted_text, context_description)
     print("ChatGPT Response:", chatgpt_response)
 
     # Step 5: Extract Target Coordinates
-    target_text = "Submit"  # Specify the text you want to detect
+    target_text = scene_text  # Specify the text you want to detect
     coordinates = extract_coordinates(ocr_data, target_text)
-
     if coordinates:
         print(f"Coordinates of '{target_text}': {coordinates}")
-        # Use Appium to interact with the element at these coordinates
+
+        # Draw a red box around the detected text
+        x, y = coordinates
+        w, h = 100, 50  # Assuming a fixed width and height for the box
+        boxed_image = cv2.rectangle(processed_image.copy(), (x - w // 2, y - h // 2), (x + w // 2, y + h // 2), (0, 0, 255), 2)
+
+        # Save the image with the red box
+        result_dir = "src/utils/result"
+        os.makedirs(result_dir, exist_ok=True)
+
+        # Find the next available number for the result image
+        existing_files = os.listdir(result_dir)
+        numbers = [int(f.split('_')[1].split('.')[0]) for f in existing_files if f.startswith('result_') and f.endswith('.png')]
+        next_number = max(numbers, default=0) + 1
+
+        result_path = os.path.join(result_dir, f"result_{next_number}.png")
+        cv2.imwrite(result_path, boxed_image)
+        print(f"Result image saved to {result_path}")
+        return coordinates
     else:
-        print(f"'{target_text}' not found in the image.")
+        return '{target_text} not found in the image'
 
 if __name__ == "__main__":
     main()
