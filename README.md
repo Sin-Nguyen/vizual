@@ -4,11 +4,24 @@ This repository contains a Flask-based API for image detection and text recognit
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [File Structure](#file-structure)
-- [Migration to openai>=1.0.0](#migration-to-openai100)
+- [Detection Smarter](#detection-smarter)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Usage](#usage)
+  - [API Endpoints](#api-endpoints)
+    - [Home](#home)
+    - [Detect Image](#detect-image)
+    - [List Scene Images](#list-scene-images)
+    - [Download Image](#download-image)
+    - [Upload Scene Image](#upload-scene-image)
+    - [Detect Text Tree](#detect-text-tree)
+    - [Python Detect Image](#python-detect-image)
+  - [File Structure](#file-structure)
+    - [Explanation of Files](#explanation-of-files)
+  - [Migration to openai\>=1.0.0](#migration-to-openai100)
+    - [Example Usage](#example-usage)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Installation
 
@@ -148,6 +161,17 @@ detection_smarter/
 ├── requirements.txt          # Python dependencies
 └── README.md                 # Project documentation
 ```
+
+### Explanation of Files
+
+- **src/api/index.py**: This is the main entry point for the Flask API server. It defines the routes and handlers for the API endpoints.
+- **src/core/index.py**: Contains the core logic for detecting objects or text within images.
+- **src/core/scenes.py**: Handles operations related to scene images, such as uploading and listing scene images.
+- **src/core/tesseract.py**: Implements text detection logic using Tesseract OCR.
+- **src/utils/result/**: Directory where processed images are stored.
+- **src/utils/image_scenes/**: Directory where scene images are stored.
+- **requirements.txt**: Lists the Python dependencies required for the project.
+- **README.md**: Project documentation, including installation instructions, usage, and API endpoint details.
 
 ## Migration to openai>=1.0.0
 
