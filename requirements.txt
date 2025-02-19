@@ -1,5 +1,10 @@
 opencv-python-headless
 pytesseract
 openai>=1.0.0
-Flask
 Werkzeug
+numpy
+jsonschema
+langdetect
+pyspellchecker
+fastapi
+uvicorn

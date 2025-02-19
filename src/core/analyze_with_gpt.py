@@ -20,8 +20,9 @@ def perform_ocr(image):
 
 # ChatGPT Analysis Function
 def analyze_with_chatgpt(ocr_data, extracted_text, context_description=""):
+   system_message = "As QA engineer, you are an AI assistant for image analysis" 
    query_list = f"OCR detected text data: {ocr_data}. Extracted text: {extracted_text}. Context: {context_description}. Suggest improvements or preprocessing techniques for better accuracy."
-   response = get_chat_completion(query_list)
+   response = get_chat_completion(query_list, system_message)
    return response
 
 # Coordinate Extraction from OCR Data

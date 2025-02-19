@@ -1,0 +1,9 @@
+venv/*
+venv
+annotated_uploads/*
+annotated_uploads
+uploads/*
+venv/bin/*
+venv/lib/*
+venv/include/*
+venv/lib64/*venv/**. */
